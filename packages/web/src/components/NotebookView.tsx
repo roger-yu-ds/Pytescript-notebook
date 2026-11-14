@@ -446,7 +446,7 @@ export function NotebookView({ name, settings, onSettings }: Props) {
 
   const keepWarm = async () => {
     const c = cache[settings.model];
-    if (!c) return;
+    if (!c || settings.cacheTtl === "off") return;
     const ids = new Set(c.cells.map((x) => x.id));
     let end = 0;
     cells.forEach((cell, i) => ids.has(cell.id) && (end = i + 1));

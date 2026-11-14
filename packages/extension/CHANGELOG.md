@@ -8,6 +8,8 @@
 - Run All skips Tutor Prompt cells instead of asking the tutor for each one.
 - Command-mode keys `T` (TypeScript), `Y` (Python) and `P` (Tutor Prompt) change the selected cells' language, as in the web app; a Markdown cell becomes a code cell first. Also in the Command Palette as "Change Cell to …". `M` (Markdown) is VS Code's own key.
 - A cell that imports a module which is a global already (`import process from "node:process"`) no longer loses the types of its other names in later cells: the checker and the tsserver plugin leave such names out of the cell's cross-cell links.
+- `polyglotTutor.cacheLifetime` (and the web app's Cache lifetime) can be `off`: no prompt caching, so each question pays plain input price for its context and there is nothing to keep warm.
+- The cost of a 5-minute cache write is 1.25× input, not 2×. It was overstated before (the 1-hour price was used for both).
 
 ## 0.1.0
 
