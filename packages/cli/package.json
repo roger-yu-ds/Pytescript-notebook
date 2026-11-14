@@ -1,0 +1,20 @@
+{
+  "name": "@polyglot-tutor/cli",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "polyglot-tutor": "./bin/polyglot-tutor.mjs"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "dependencies": {
+    "@polyglot-tutor/core": "*",
+    "tsx": "^4.23.15"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,624 @@
+{
+  "name": "polyglot-tutor",
+  "displayName": "Polyglot Tutor",
+  "description": "Notebooks for learning to code: Python, TypeScript (Deno) and SQL (DuckDB) cells, plus prompt cells where a Socratic AI tutor sees everything above them.",
+  "version": "0.1.0",
+  "publisher": "roger-yu-ds",
+  "license": "MIT",
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#312e81",
+    "theme": "dark"
+  },
+  "pricing": "Free",
+  "homepage": "https://github.com/roger-yu-ds/Pytescript-notebook#readme",
+  "bugs": {
+    "url": "https://github.com/roger-yu-ds/Pytescript-notebook/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/roger-yu-ds/Pytescript-notebook"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Notebooks",
+    "Education",
+    "AI",
+    "Data Science"
+  ],
+  "keywords": [
+    "notebook",
+    "jupyter",
+    "typescript",
+    "python",
+    "sql",
+    "duckdb",
+    "tutor",
+    "claude",
+    "learning",
+    "polyglot"
+  ],
+  "extensionKind": [
+    "workspace"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onNotebook:polyglot-tutor",
+    "onNotebook:jupyter-notebook"
+  ],
+  "contributes": {
+    "notebooks": [
+      {
+        "type": "polyglot-tutor",
+        "displayName": "Polyglot Tutor",
+        "selector": [
+          {
+            "filenamePattern": "*.ipynb"
+          }
+        ],
+        "priority": "option"
+      }
+    ],
+    "notebookRenderer": [
+      {
+        "id": "polyglot-tutor.answer",
+        "displayName": "Polyglot Tutor answer",
+        "entrypoint": "./dist/renderer.js",
+        "mimeTypes": [
+          "application/vnd.polyglot-tutor.answer+json"
+        ],
+        "requiresMessaging": "optional"
+      }
+    ],
+    "languages": [
+      {
+        "id": "tutor-prompt",
+        "aliases": [
+          "Tutor Prompt"
+        ],
+        "configuration": "./syntaxes/tutor-prompt.language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "tutor-prompt",
+        "scopeName": "text.tutor-prompt",
+        "path": "./syntaxes/tutor-prompt.tmLanguage.json",
+        "embeddedLanguages": {
+          "meta.embedded.block": "markdown"
+        }
+      }
+    ],
+    "commands": [
+      {
+        "command": "polyglotTutor.newNotebook",
+        "title": "New Notebook",
+        "category": "Polyglot Tutor"
+      },
+      {
+        "command": "polyglotTutor.openWelcome",
+        "title": "Open Welcome Tour",
+        "category": "Polyglot Tutor"
+      },
+      {
+        "command": "polyglotTutor.setApiKey",
+        "title": "Set Anthropic API Key",
+        "category": "Polyglot Tutor"
+      },
+      {
+        "command": "polyglotTutor.clearApiKey",
+        "title": "Remove Anthropic API Key",
+        "category": "Polyglot Tutor"
+      },
+      {
+        "command": "polyglotTutor.insertPromptCell",
+        "title": "Insert Prompt Cell Below",
+        "category": "Polyglot Tutor",
+        "icon": "$(sparkle)"
+      },
+      {
+        "command": "polyglotTutor.cellToTypeScript",
+        "title": "Change Cell to TypeScript",
+        "category": "Polyglot Tutor"
+      },
+      {
+        "command": "polyglotTutor.cellToPython",
+        "title": "Change Cell to Python",
+        "category": "Polyglot Tutor"
+      },
+      {
+        "command": "polyglotTutor.cellToPrompt",
+        "title": "Change Cell to Tutor Prompt",
+        "category": "Polyglot Tutor"
+      },
+      {
+        "command": "polyglotTutor.kernelMenu",
+        "title": "Kernel Actions…",
+        "category": "Polyglot Tutor"
+      },
+      {
+        "command": "polyglotTutor.restartKernels",
+        "title": "Restart Kernels",
+        "category": "Polyglot Tutor"
+      },
+      {
+        "command": "polyglotTutor.interruptKernels",
+        "title": "Interrupt Kernels",
+        "category": "Polyglot Tutor"
+      },
+      {
+        "command": "polyglotTutor.keepWarm",
+        "title": "Keep Prompt Cache Warm",
+        "category": "Polyglot Tutor"
+      },
+      {
+        "command": "polyglotTutor.selectModel",
+        "title": "Select Tutor Model",
+        "category": "Polyglot Tutor"
+      },
+      {
+        "command": "polyglotTutor.toggleMode",
+        "title": "Toggle Hint / Answer",
+        "category": "Polyglot Tutor"
+      },
+      {
+        "command": "polyglotTutor.toggleHidden",
+        "title": "Hide Cell from Tutor",
+        "category": "Polyglot Tutor",
+        "icon": "$(eye-closed)"
+      },
+      {
+        "command": "polyglotTutor.togglePinned",
+        "title": "Always Send Cell in Full",
+        "category": "Polyglot Tutor",
+        "icon": "$(pin)"
+      },
+      {
+        "command": "polyglotTutor.askAboutError",
+        "title": "Ask the Tutor About This Error",
+        "category": "Polyglot Tutor"
+      },
+      {
+        "command": "polyglotTutor.reopenWithTutor",
+        "title": "Reopen with Polyglot Tutor",
+        "category": "Polyglot Tutor"
+      },
+      {
+        "command": "polyglotTutor.setupRuntimes",
+        "title": "Set Up Runtimes (Python, Deno)",
+        "category": "Polyglot Tutor"
+      },
+      {
+        "command": "polyglotTutor.showLog",
+        "title": "Show Log",
+        "category": "Polyglot Tutor"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "polyglotTutor.insertPromptCell",
+          "when": "notebookType == polyglot-tutor"
+        },
+        {
+          "command": "polyglotTutor.cellToTypeScript",
+          "when": "notebookType == polyglot-tutor"
+        },
+        {
+          "command": "polyglotTutor.cellToPython",
+          "when": "notebookType == polyglot-tutor"
+        },
+        {
+          "command": "polyglotTutor.cellToPrompt",
+          "when": "notebookType == polyglot-tutor"
+        },
+        {
+          "command": "polyglotTutor.kernelMenu",
+          "when": "notebookType == polyglot-tutor"
+        },
+        {
+          "command": "polyglotTutor.restartKernels",
+          "when": "notebookType == polyglot-tutor"
+        },
+        {
+          "command": "polyglotTutor.interruptKernels",
+          "when": "notebookType == polyglot-tutor"
+        },
+        {
+          "command": "polyglotTutor.keepWarm",
+          "when": "notebookType == polyglot-tutor"
+        },
+        {
+          "command": "polyglotTutor.toggleMode",
+          "when": "false"
+        },
+        {
+          "command": "polyglotTutor.toggleHidden",
+          "when": "false"
+        },
+        {
+          "command": "polyglotTutor.togglePinned",
+          "when": "false"
+        },
+        {
+          "command": "polyglotTutor.askAboutError",
+          "when": "false"
+        },
+        {
+          "command": "polyglotTutor.reopenWithTutor",
+          "when": "notebookType == jupyter-notebook"
+        }
+      ],
+      "notebook/toolbar": [
+        {
+          "command": "polyglotTutor.insertPromptCell",
+          "when": "notebookType == polyglot-tutor",
+          "group": "navigation/add@3"
+        }
+      ],
+      "notebook/cell/title": [
+        {
+          "command": "polyglotTutor.toggleHidden",
+          "when": "notebookType == polyglot-tutor",
+          "group": "inline/polyglot@1"
+        },
+        {
+          "command": "polyglotTutor.togglePinned",
+          "when": "notebookType == polyglot-tutor && notebookCellType == code",
+          "group": "inline/polyglot@2"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Polyglot Tutor",
+      "properties": {
+        "polyglotTutor.model": {
+          "type": "string",
+          "default": "claude-sonnet-5-5",
+          "enum": [
+            "claude-sonnet-5-5",
+            "claude-opus-5-5",
+            "claude-haiku-5-5",
+            "claude-fable-5-1"
+          ],
+          "enumItemLabels": [
+            "Sonnet 5.5",
+            "Opus 5.5",
+            "Haiku 5.5",
+            "Fable 5.1"
+          ],
+          "enumDescriptions": [
+            "Balanced (default). $2 / $10 per million tokens.",
+            "Stronger reasoning. $4 / $20.",
+            "Fastest and cheapest. $0.10 / $0.50.",
+            "Most capable, most expensive. $10 / $50."
+          ],
+          "markdownDescription": "Model the tutor uses to answer prompt cells.",
+          "order": 0
+        },
+        "polyglotTutor.effort": {
+          "type": "string",
+          "default": "medium",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max"
+          ],
+          "markdownDescription": "How much the tutor thinks before answering. Higher is slower and costs more.",
+          "order": 1
+        },
+        "polyglotTutor.learnerProfile": {
+          "type": "string",
+          "default": "",
+          "editPresentation": "multilineText",
+          "markdownDescription": "Sent to the tutor with every question (and cached), e.g. *Comfortable with Python, new to TypeScript generics. Prefer short explanations.*",
+          "order": 2
+        },
+        "polyglotTutor.showReasoning": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Show a collapsible summary of the tutor's reasoning above each answer.",
+          "order": 3
+        },
+        "polyglotTutor.cacheLifetime": {
+          "type": "string",
+          "default": "1h",
+          "enum": [
+            "1h",
+            "5m"
+          ],
+          "enumItemLabels": [
+            "1 hour",
+            "5 minutes"
+          ],
+          "enumDescriptions": [
+            "Writing the cache costs 2× input once; questions within the hour reuse it cheaply.",
+            "Writing costs 1.25× input but expires quickly."
+          ],
+          "markdownDescription": "Prompt cache lifetime. The status bar counts it down.",
+          "order": 4
+        },
+        "polyglotTutor.context.recentCells": {
+          "type": "number",
+          "default": 10,
+          "minimum": 1,
+          "maximum": 200,
+          "markdownDescription": "Cells sent verbatim (outputs and charts). Rounded up to whole blocks, plus the block in progress.",
+          "order": 10
+        },
+        "polyglotTutor.context.blockSize": {
+          "type": "number",
+          "default": 10,
+          "minimum": 1,
+          "maximum": 100,
+          "markdownDescription": "Older cells are compressed in fixed blocks of this size, so the cached prefix only changes once per block.",
+          "order": 11
+        },
+        "polyglotTutor.context.tokenBudget": {
+          "type": "number",
+          "default": 40000,
+          "minimum": 1000,
+          "maximum": 500000,
+          "markdownDescription": "Above this (estimated), the oldest blocks are replaced by short summaries. The context ring in the status bar shows how close you are.",
+          "order": 12
+        },
+        "polyglotTutor.context.outputLimit": {
+          "type": "number",
+          "default": 2000,
+          "minimum": 200,
+          "maximum": 100000,
+          "markdownDescription": "Characters kept per output in full cells (head + tail). Pinned cells are never cut.",
+          "order": 13
+        },
+        "polyglotTutor.summaryModel": {
+          "type": "string",
+          "default": "claude-haiku-5-5",
+          "enum": [
+            "claude-haiku-5-5",
+            "claude-sonnet-5-5",
+            "claude-opus-5-5",
+            "claude-fable-5-1"
+          ],
+          "enumItemLabels": [
+            "Haiku 5.5",
+            "Sonnet 5.5",
+            "Opus 5.5",
+            "Fable 5.1"
+          ],
+          "markdownDescription": "Model that writes the summaries of old blocks (each block is summarised once and cached).",
+          "order": 14
+        },
+        "polyglotTutor.pythonPath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine-overridable",
+          "markdownDescription": "Python executable with `jupyter_server`, `ipykernel`, `pandas`, `duckdb`, `pyarrow` and `deltalake`. Leave empty to use the environment created by **Polyglot Tutor: Set Up Runtimes**.",
+          "order": 20
+        },
+        "polyglotTutor.denoPath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine-overridable",
+          "markdownDescription": "Deno executable for TypeScript cells. Leave empty to use the one installed by **Polyglot Tutor: Set Up Runtimes**, or `~/.deno/bin/deno` if present.",
+          "order": 21
+        },
+        "polyglotTutor.tintPromptCells": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Tint Tutor Prompt cells so they stand out from code cells. Change the colour with `polyglotTutor.promptCellBackground` in `workbench.colorCustomizations`."
+        }
+      }
+    },
+    "colors": [
+      {
+        "id": "polyglotTutor.promptCellBackground",
+        "description": "Background of the lines in Tutor Prompt cells.",
+        "defaults": {
+          "dark": "#b48cff1f",
+          "light": "#7c4dff14",
+          "highContrast": "#b48cff33",
+          "highContrastLight": "#7c4dff26"
+        }
+      },
+      {
+        "id": "polyglotTutor.promptCellRuler",
+        "description": "Marks Tutor Prompt cells in the scrollbar.",
+        "defaults": {
+          "dark": "#b48cffaa",
+          "light": "#7c4dffaa",
+          "highContrast": "#b48cff",
+          "highContrastLight": "#7c4dff"
+        }
+      }
+    ],
+    "typescriptServerPlugins": [
+      {
+        "name": "polyglot-tutor-ts-plugin",
+        "enableForWorkspaceTypeScriptVersions": true
+      }
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "polyglotTutor.shared",
+          "name": "Shared Values",
+          "icon": "$(database)",
+          "when": "polyglotTutor.notebookActive",
+          "contextualTitle": "Polyglot Tutor"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "polyglotTutor.shared",
+        "contents": "Nothing shared yet. In a cell, `share(\"name\", value)` makes a value available to Python, TypeScript and SQL. `persist=True` saves tables as Delta tables."
+      }
+    ],
+    "icons": {
+      "polyglot-ring-0": {
+        "description": "Context ring, 0/8 full",
+        "default": {
+          "fontPath": "./media/ring.woff",
+          "fontCharacter": "\\E000"
+        }
+      },
+      "polyglot-ring-1": {
+        "description": "Context ring, 1/8 full",
+        "default": {
+          "fontPath": "./media/ring.woff",
+          "fontCharacter": "\\E001"
+        }
+      },
+      "polyglot-ring-2": {
+        "description": "Context ring, 2/8 full",
+        "default": {
+          "fontPath": "./media/ring.woff",
+          "fontCharacter": "\\E002"
+        }
+      },
+      "polyglot-ring-3": {
+        "description": "Context ring, 3/8 full",
+        "default": {
+          "fontPath": "./media/ring.woff",
+          "fontCharacter": "\\E003"
+        }
+      },
+      "polyglot-ring-4": {
+        "description": "Context ring, 4/8 full",
+        "default": {
+          "fontPath": "./media/ring.woff",
+          "fontCharacter": "\\E004"
+        }
+      },
+      "polyglot-ring-5": {
+        "description": "Context ring, 5/8 full",
+        "default": {
+          "fontPath": "./media/ring.woff",
+          "fontCharacter": "\\E005"
+        }
+      },
+      "polyglot-ring-6": {
+        "description": "Context ring, 6/8 full",
+        "default": {
+          "fontPath": "./media/ring.woff",
+          "fontCharacter": "\\E006"
+        }
+      },
+      "polyglot-ring-7": {
+        "description": "Context ring, 7/8 full",
+        "default": {
+          "fontPath": "./media/ring.woff",
+          "fontCharacter": "\\E007"
+        }
+      },
+      "polyglot-ring-8": {
+        "description": "Context ring, 8/8 full",
+        "default": {
+          "fontPath": "./media/ring.woff",
+          "fontCharacter": "\\E008"
+        }
+      }
+    },
+    "walkthroughs": [
+      {
+        "id": "getStarted",
+        "title": "Get started with Polyglot Tutor",
+        "description": "Notebooks with Python, TypeScript and SQL cells, and an AI tutor that sees everything above your question.",
+        "steps": [
+          {
+            "id": "apiKey",
+            "title": "Add your Anthropic API key",
+            "description": "The tutor uses Claude with your own API key, kept in VS Code's secret storage.\n[Set API Key](command:polyglotTutor.setApiKey)",
+            "media": {
+              "markdown": "media/walkthrough/api-key.md"
+            },
+            "completionEvents": [
+              "onCommand:polyglotTutor.setApiKey"
+            ]
+          },
+          {
+            "id": "runtimes",
+            "title": "Set up Python and Deno",
+            "description": "Python and SQL cells run in Jupyter; TypeScript cells run on Deno. Install them into the extension's own folder, or point the settings at yours.\n[Set Up Runtimes](command:polyglotTutor.setupRuntimes)",
+            "media": {
+              "markdown": "media/walkthrough/runtimes.md"
+            },
+            "completionEvents": [
+              "onCommand:polyglotTutor.setupRuntimes"
+            ]
+          },
+          {
+            "id": "tour",
+            "title": "Take the welcome tour",
+            "description": "A guided notebook: run each cell with Shift+Enter and ask the tutor about what you see.\n[Open Welcome Tour](command:polyglotTutor.openWelcome)",
+            "media": {
+              "markdown": "media/walkthrough/tour.md"
+            },
+            "completionEvents": [
+              "onCommand:polyglotTutor.openWelcome",
+              "onCommand:polyglotTutor.newNotebook"
+            ]
+          },
+          {
+            "id": "profile",
+            "title": "Tell the tutor about yourself",
+            "description": "A short learner profile makes answers fit you.\n[Edit Learner Profile](command:workbench.action.openSettings?%22polyglotTutor.learnerProfile%22)",
+            "media": {
+              "markdown": "media/walkthrough/profile.md"
+            },
+            "completionEvents": [
+              "onSettingChanged:polyglotTutor.learnerProfile"
+            ]
+          }
+        ]
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "polyglotTutor.cellToTypeScript",
+        "key": "t",
+        "when": "notebookEditorFocused && !inputFocus && notebookType == polyglot-tutor"
+      },
+      {
+        "command": "polyglotTutor.cellToPython",
+        "key": "y",
+        "when": "notebookEditorFocused && !inputFocus && notebookType == polyglot-tutor"
+      },
+      {
+        "command": "polyglotTutor.cellToPrompt",
+        "key": "p",
+        "when": "notebookEditorFocused && !inputFocus && notebookType == polyglot-tutor"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch",
+    "typecheck": "tsc --noEmit -p . && tsc --noEmit -p renderer",
+    "test": "npm run test:unit && node test/run.mjs",
+    "package": "node scripts/package.mjs",
+    "test:unit": "tsx --test test/unit/*.test.ts",
+    "test:vsix": "node test/run.mjs --vsix"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^26.6.6",
+    "@types/vscode": "~1.90.0",
+    "@types/vscode-notebook-renderer": "^1.72.3",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^4.1.0",
+    "esbuild": "*",
+    "highlight.js": "^11.12.0",
+    "markdown-it": "^14.1.0",
+    "svg2ttf": "^6.1.0",
+    "svgicons2svgfont": "^15.0.1",
+    "ttf2woff": "^3.0.0",
+    "typescript": "^7.0.2",
+    "typescript-6": "npm:typescript@^6.0.3",
+    "@polyglot-tutor/core": "*"
+  }
+}

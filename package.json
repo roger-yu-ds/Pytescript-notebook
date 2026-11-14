@@ -1,0 +1,29 @@
+{
+  "name": "polyglot-tutor",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/core",
+    "packages/server",
+    "packages/web",
+    "packages/extension",
+    "packages/cli"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n server,web -c blue,magenta \"npm run dev -w @polyglot-tutor/server\" \"npm run dev -w @polyglot-tutor/web\"",
+    "build:extension": "npm run build -w polyglot-tutor",
+    "package:extension": "npm run package -w polyglot-tutor",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test:unit": "npm test -w @polyglot-tutor/core && npm run test:unit -w polyglot-tutor",
+    "test:cli": "npm test -w @polyglot-tutor/cli",
+    "test:web": "node tests/e2e.mjs",
+    "test:extension": "node packages/extension/test/run.mjs",
+    "coverage": "node scripts/coverage.mjs",
+    "test": "npm run typecheck && npm run test:unit && npm run test:cli && npm run test:web && npm run test:extension"
+  },
+  "devDependencies": {
+    "c8": "^10.1.3",
+    "concurrently": "^9.2.5",
+    "playwright": "^1.64.1"
+  }
+}

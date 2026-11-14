@@ -1,0 +1,5 @@
+{
+  "scopeName": "text.tutor-prompt",
+  "name": "Tutor Prompt",
+  "patterns": [{ "include": "text.html.markdown" }]
+}

@@ -1,0 +1,9 @@
+{
+  "all": false,
+  "include": ["packages/core/src/**", "packages/cli/src/**", "packages/server/src/**", "packages/extension/src/**", "packages/extension/ts-plugin/**"],
+  "exclude": ["**/test/**", "**/node_modules/**", "**/*.d.ts"],
+  "exclude-after-remap": true,
+  "reporter": ["text", "lcov"],
+  "reports-dir": "coverage",
+  "temp-directory": "coverage/tmp"
+}

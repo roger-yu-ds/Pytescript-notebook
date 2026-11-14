@@ -1,0 +1,11 @@
+node_modules/
+.venv
+dist/
+.env
+*.log
+.vscode-test/
+dist-test/
+coverage/
+packages/extension/media/welcome.ipynb
+*.vsix
+packages/extension/LICENSE

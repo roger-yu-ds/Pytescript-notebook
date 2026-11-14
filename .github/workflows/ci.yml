@@ -1,0 +1,71 @@
+name: CI
+
+# CI is manual only, to stay within the free Actions minutes for private repositories: start it from
+# the Actions tab ("Run workflow"). It runs on Ubuntu unless "all_os" is ticked (macOS minutes count 10x,
+# Windows 2x). To run it on every push and pull request again, add `push:` and `pull_request:` back here.
+on:
+  workflow_dispatch:
+    inputs:
+      all_os:
+        description: "Also run on macOS and Windows"
+        type: boolean
+        default: false
+
+jobs:
+  test:
+    name: test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJSON(inputs.all_os && '["ubuntu-latest","macos-latest","windows-latest"]' || '["ubuntu-latest"]') }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Python environment for the kernels
+        uses: astral-sh/setup-uv@v6
+      - run: |
+          uv venv --python 3.13 .venv
+          uv pip install --python .venv -r requirements.txt
+
+      - name: Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: 2.9.8
+      - run: |
+          # Windows' bash reports the path without .exe, which spawning tolerates but existence checks don't.
+          deno_bin="$(which deno)"; if [ "$RUNNER_OS" = "Windows" ]; then deno_bin="$deno_bin.exe"; fi
+          echo "DENO_BIN=$deno_bin" >> "$GITHUB_ENV"
+          echo "POLYGLOT_DENO=$deno_bin" >> "$GITHUB_ENV"
+
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+
+      - run: npm run typecheck
+
+      # Unit, CLI (real kernels) and web e2e tests, under c8: a report for every
+      # source file, and per-file thresholds for the files new or changed on this
+      # branch (scripts/coverage.mjs).
+      - name: Unit, CLI and web tests with coverage
+        run: npm run coverage -- --web
+
+      - name: Coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.os }}
+          path: coverage/lcov.info
+          if-no-files-found: ignore
+
+      - name: Extension tests (packaged .vsix, real VS Code)
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then xvfb-run -a npm run test:vsix -w polyglot-tutor; else npm run test:vsix -w polyglot-tutor; fi

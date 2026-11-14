@@ -1,0 +1,16 @@
+src/**
+renderer/**
+test/**
+scripts/**
+ts-plugin/**
+dist-test/**
+.vscode-test/**
+**/*.map
+**/*.ts
+!dist/ts-lib/**/*.d.ts
+tsconfig.json
+build.mjs
+media/icon.svg
+node_modules/**
+!node_modules/polyglot-tutor-ts-plugin/**
+*.vsix
