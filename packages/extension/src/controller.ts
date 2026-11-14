@@ -17,6 +17,7 @@ export class TutorController implements vscode.Disposable {
   constructor(
     private host: RuntimeHost,
     private tutor: TutorService,
+    private log?: vscode.LogOutputChannel,
   ) {
     this.controller = vscode.notebooks.createNotebookController("polyglot-tutor-kernel", NOTEBOOK_TYPE, "Polyglot Tutor");
     this.controller.supportedLanguages = ["python", "typescript", "sql", PROMPT_LANG];
@@ -146,6 +147,7 @@ export class TutorController implements vscode.Disposable {
       if (timer) clearTimeout(timer);
       await pending;
       const message = abort.signal.aborted ? "Stopped." : this.tutor.describeError(e);
+      if (!abort.signal.aborted) this.log?.error(`[tutor] ${message}`, e);
       Object.assign(answer, { status: "error", error: message });
       await exec.replaceOutputItems(answerItems(answer), output);
       exec.end(false, Date.now());

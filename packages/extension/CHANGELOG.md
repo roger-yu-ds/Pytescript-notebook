@@ -8,6 +8,7 @@
 - Run All skips Tutor Prompt cells instead of asking the tutor for each one.
 - Command-mode keys `T` (TypeScript), `Y` (Python) and `P` (Tutor Prompt) change the selected cells' language, as in the web app; a Markdown cell becomes a code cell first. Also in the Command Palette as "Change Cell to …". `M` (Markdown) is VS Code's own key.
 - A cell that imports a module which is a global already (`import process from "node:process"`) no longer loses the types of its other names in later cells: the checker and the tsserver plugin leave such names out of the cell's cross-cell links.
+- A tutor request that cannot reach the API now says why (e.g. `ECONNRESET: socket hang up`) and what to check, instead of "API error : Connection error.", and every tutor error is written to the Polyglot Tutor log.
 
 ## 0.1.0
 
