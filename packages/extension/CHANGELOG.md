@@ -8,6 +8,8 @@
 - Run All skips Tutor Prompt cells instead of asking the tutor for each one.
 - Command-mode keys `T` (TypeScript), `Y` (Python) and `P` (Tutor Prompt) change the selected cells' language, as in the web app; a Markdown cell becomes a code cell first. Also in the Command Palette as "Change Cell to …". `M` (Markdown) is VS Code's own key.
 - A cell that imports a module which is a global already (`import process from "node:process"`) no longer loses the types of its other names in later cells: the checker and the tsserver plugin leave such names out of the cell's cross-cell links.
+- Relative paths in Python cells resolve from the notebook's folder even when the kernel's Python lacks one of Polyglot Tutor's packages (e.g. `pyarrow`). Before, such a kernel stayed in Polyglot Tutor's storage folder, so `Path("../data/x.json")` failed with a confusing FileNotFoundError.
+- When a kernel's setup fails, the next cell run shows why (e.g. `No module named 'pyarrow'`) and what to install, instead of only writing it to the log.
 
 ## 0.1.0
 
