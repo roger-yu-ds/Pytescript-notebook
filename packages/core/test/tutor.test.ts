@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
 import { fileURLToPath } from "node:url";
+import Anthropic from "@anthropic-ai/sdk";
 import { Tutor, costOf, describeError } from "../src/tutor.ts";
 import { DEFAULT_SETTINGS, type AskRequest, type ContextCell } from "../src/types.ts";
 
@@ -103,4 +104,12 @@ test("summaries are written once by the summary model and cached on disk", async
 test("errors are friendly", () => {
   assert.equal(describeError(new Error("Could not resolve authentication method"), "Set the key."), "Set the key.");
   assert.equal(describeError("x"), "x");
+});
+
+test("connection errors name the network cause and what to do", () => {
+  const net = Object.assign(new Error("socket hang up"), { code: "ECONNRESET" });
+  const e = new Anthropic.APIConnectionError({ cause: Object.assign(new TypeError("fetch failed"), { cause: net }) });
+  assert.equal(describeError(e), "Couldn't reach the Anthropic API (ECONNRESET: socket hang up). Check the internet connection (or VPN / proxy), then run the cell again.");
+  assert.match(describeError(new Anthropic.APIConnectionError({})), /^Couldn't reach the Anthropic API\. Check/);
+  assert.match(describeError(new Anthropic.APIConnectionTimeoutError()), /timed out/);
 });

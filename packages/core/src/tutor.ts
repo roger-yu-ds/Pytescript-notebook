@@ -64,7 +64,23 @@ export function costOf(model: string, u: Anthropic.Messages.Usage | Anthropic.Be
 const DEFAULT_KEY_HELP = "No Anthropic API key found. Set ANTHROPIC_API_KEY and try again.";
 
 /** A short, learner-friendly message for an error from the API or a kernel. */
+/** The network reason under an error, e.g. "ECONNRESET: socket hang up" (fetch wraps it in `cause`). */
+export function networkCause(e: unknown): string {
+  const seen: string[] = [];
+  for (let c = (e as { cause?: unknown })?.cause, depth = 0; c && depth < 5; c = (c as { cause?: unknown }).cause, depth++) {
+    const { code, message } = c as { code?: unknown; message?: unknown };
+    const text = [typeof code === "string" ? code : "", typeof message === "string" ? message : ""].filter(Boolean).join(": ");
+    if (text && !seen.some((s) => s.includes(text))) seen.push(text);
+  }
+  return seen.at(-1) ?? "";
+}
+
 export function describeError(e: unknown, missingKeyHelp = DEFAULT_KEY_HELP): string {
+  if (e instanceof Anthropic.APIConnectionTimeoutError) return "The request to the Anthropic API timed out. Run the cell again.";
+  if (e instanceof Anthropic.APIConnectionError) {
+    const cause = networkCause(e);
+    return `Couldn't reach the Anthropic API${cause ? ` (${cause})` : ""}. Check the internet connection (or VPN / proxy), then run the cell again.`;
+  }
   if (e instanceof Anthropic.AuthenticationError) return `The Anthropic API rejected the key. ${missingKeyHelp}`;
   if (e instanceof Anthropic.RateLimitError) return "Rate limited by the API. Try again in a moment.";
   if (e instanceof Anthropic.APIError) return `API error ${e.status ?? ""}: ${e.message}`;

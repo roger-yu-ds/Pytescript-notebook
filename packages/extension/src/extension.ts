@@ -56,7 +56,7 @@ export function activate(context: vscode.ExtensionContext): PolyglotTutorApi {
     host,
     checker,
     vscode.workspace.registerNotebookSerializer(NOTEBOOK_TYPE, new IpynbSerializer(), { transientOutputs: false }),
-    new TutorController(host, tutor),
+    new TutorController(host, tutor, log),
     new StatusBar(states),
     registerPromptTint(),
     vscode.notebooks.registerNotebookCellStatusBarItemProvider(NOTEBOOK_TYPE, cellBar),
