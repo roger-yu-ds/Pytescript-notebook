@@ -7,6 +7,7 @@ import { createServer } from "node:net";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
 import WebSocket from "ws";
+import { REQUIRED_PYTHON_MODULES } from "./runtimes.ts";
 import type { KernelLang as Lang, KernelState, Output } from "./types.ts";
 
 /** Where core reports what it's doing; level defaults to "warn". */
@@ -165,6 +166,16 @@ interface PendingRun {
   settle?: ReturnType<typeof setTimeout>;
 }
 
+/** The note shown on the first cell run after a kernel's prelude failed. */
+export function setupWarning(lang: string, error: string): string {
+  const missing = /No module named '([^']+)'/.exec(error)?.[1];
+  const features = lang === "python" ? "share()/get(), SQL cells and saved tables" : "share()/get()";
+  const fix = missing
+    ? `Install ${missing} into the Python environment the kernels use (Polyglot Tutor needs ${REQUIRED_PYTHON_MODULES.join(", ")}), then restart the kernel.`
+    : "See the Polyglot Tutor log for details, then restart the kernel.";
+  return `⚠ Polyglot Tutor couldn't finish setting up the ${lang} kernel: ${error}\nCells still run, but ${features} won't work. ${fix}\n\n`;
+}
+
 /** How long a Deno cell's run waits for late output after its idle status. */
 const DENO_SETTLE_MS = 100;
 
@@ -184,12 +195,19 @@ export class Kernel {
     private log: Logger = consoleLogger,
   ) {}
 
+  /** Why the last prelude failed, until it has been shown on a cell's output. */
+  private setupError: string | null = null;
+
   /** Define share()/get() etc. Runs silently, outside the run queue. */
   async runPrelude() {
+    this.setupError = null;
     if (!this.prelude) return;
     const errors: string[] = [];
     const r = await this.send(this.prelude, true, (o) => o.kind === "error" && errors.push(`${o.ename}: ${o.evalue}`), () => {});
-    if (!r.ok) this.log(`[kernel ${this.lang}] prelude failed: ${errors.join("; ") || "unknown error"}`);
+    if (!r.ok) {
+      this.setupError = errors.join("; ") || "unknown error";
+      this.log(`[kernel ${this.lang}] prelude failed: ${this.setupError}`);
+    }
   }
 
   connect(): Promise<void> {
@@ -311,7 +329,15 @@ export class Kernel {
 
   /** Execute code; runs are queued so outputs never interleave. */
   execute(code: string, onOutput: (o: Output) => void, onClear: () => void) {
-    const run = () => this.send(code, false, onOutput, onClear);
+    const run = () => {
+      // A failed prelude is otherwise silent: the cell would then fail in a
+      // confusing way (no share(), wrong working folder). Say why, once.
+      if (this.setupError) {
+        onOutput({ kind: "stream", name: "stderr", text: setupWarning(this.lang, this.setupError) });
+        this.setupError = null;
+      }
+      return this.send(code, false, onOutput, onClear);
+    };
     const result = this.queue.then(run, run);
     this.queue = result.catch(() => {});
     return result;
