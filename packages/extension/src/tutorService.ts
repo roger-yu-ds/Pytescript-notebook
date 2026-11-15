@@ -67,7 +67,7 @@ export class TutorService {
   async keepWarm(nb: vscode.NotebookDocument): Promise<boolean> {
     const settings = tutorSettings();
     const cache = this.states.get(nb.uri).cache[settings.model];
-    if (!cache) return false;
+    if (!cache || settings.cacheTtl === "off") return false;
     const ids = new Set(cache.cells.map((c) => c.id));
     let end = 0;
     nb.getCells().forEach((c, i) => ids.has(cellId(c)) && (end = i + 1));

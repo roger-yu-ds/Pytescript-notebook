@@ -16,7 +16,7 @@ Write Python, TypeScript or SQL in notebook cells, run them, and ask questions i
 - **Run All** runs the code cells and skips Tutor Prompt cells, so a run never bills your API key for questions you didn't just ask. Run prompt cells one at a time.
 - **Delta Lake tables.** `share("t", df, persist=True)` saves a versioned table next to the notebook (`.data/<notebook>/`). Read old versions with `get("t", version=0)` or `select * from delta_at('t', 0)`.
 - **Long notebooks stay cheap.** Context is compressed in frozen blocks: older cells are sent compact, and the oldest are summarised when the context passes your token budget. The ring in the status bar shows how full it is.
-- **Prompt caching.** A quiet countdown in the status bar shows how long the cache stays warm (1 hour by default); click it to keep it warm.
+- **Prompt caching.** A quiet countdown in the status bar shows how long the cache stays warm (1 hour by default); click it to keep it warm. Set `polyglotTutor.cacheLifetime` to `off` to turn caching off.
 - **Plain `.ipynb` files** that open in Jupyter and on GitHub. Prompt cells are saved as readable Markdown.
 
 ## Getting started
@@ -50,7 +50,7 @@ Running cells uses VS Code's usual notebook keys (Shift+Enter, Ctrl+Enter, Alt+E
 | `polyglotTutor.effort` | medium | How much the tutor thinks before answering |
 | `polyglotTutor.learnerProfile` | | Sent with every question: your background and preferences |
 | `polyglotTutor.showReasoning` | off | Collapsible summary of the tutor's reasoning |
-| `polyglotTutor.cacheLifetime` | 1 hour | Prompt cache lifetime (1 hour or 5 minutes) |
+| `polyglotTutor.cacheLifetime` | 1 hour | Prompt cache lifetime: 1 hour, 5 minutes, or off |
 | `polyglotTutor.context.*` | 10 / 10 / 40k / 2000 | Recent cells sent in full, block size, token budget, output limit |
 | `polyglotTutor.summaryModel` | Haiku 5.5 | Writes the summaries of old blocks |
 | `polyglotTutor.pythonPath` / `denoPath` | | Your own runtimes instead of the managed ones |

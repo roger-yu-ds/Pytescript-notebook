@@ -15,11 +15,13 @@ export function pythonPrelude({ hubUrl, token, dataDir, cwd }: PreludeOptions): 
   return `
 def __pn_setup():
     import json, os, re, urllib.request, urllib.error, urllib.parse
+    # First, before anything that can fail (a missing package below): relative
+    # paths in cells resolve from the notebook's folder, as in Jupyter.
+    os.chdir(${lit(cwd)})
     import duckdb, pyarrow as pa
     from IPython import get_ipython
 
     URL, TOKEN, DATA = ${lit(hubUrl)}, ${lit(token)}, ${lit(dataDir)}
-    os.chdir(${lit(cwd)})
     ip = get_ipython()
 
     def _sqlpath(p):  # a path inside a SQL string literal
