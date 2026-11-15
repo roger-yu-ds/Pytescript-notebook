@@ -329,17 +329,20 @@
           "default": "1h",
           "enum": [
             "1h",
-            "5m"
+            "5m",
+            "off"
           ],
           "enumItemLabels": [
             "1 hour",
-            "5 minutes"
+            "5 minutes",
+            "Off"
           ],
           "enumDescriptions": [
-            "Writing the cache costs 2× input once; questions within the hour reuse it cheaply.",
-            "Writing costs 1.25× input but expires quickly."
+            "Writing the cache costs 2× input once; questions within the hour reuse it at 0.1×.",
+            "Writing costs 1.25× input; reuse within 5 minutes costs 0.1×, and each reuse restarts the 5 minutes.",
+            "No caching: every question pays 1× input for the whole context. Cheapest when the context changes before most questions."
           ],
-          "markdownDescription": "Prompt cache lifetime. The status bar counts it down.",
+          "markdownDescription": "Prompt cache lifetime, or `off`. The status bar counts it down.",
           "order": 4
         },
         "polyglotTutor.context.recentCells": {

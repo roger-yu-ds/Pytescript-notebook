@@ -57,7 +57,8 @@ export interface ContextSettings {
   outputLimit: number; // characters kept per verbatim output (head + tail)
 }
 
-export type CacheTtl = "5m" | "1h";
+/** Prompt cache lifetime; "off" sends no cache breakpoints. */
+export type CacheTtl = "5m" | "1h" | "off";
 
 export interface Settings {
   model: string;
@@ -81,7 +82,7 @@ export const DEFAULT_SETTINGS: Settings = {
   showThinking: false,
 };
 
-export const ttlMs = (t: CacheTtl) => (t === "5m" ? 5 : 60) * 60 * 1000;
+export const ttlMs = (t: CacheTtl) => (t === "off" ? 0 : t === "5m" ? 5 : 60) * 60 * 1000;
 
 export interface ModelInfo {
   id: string;

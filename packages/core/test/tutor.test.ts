@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { Tutor, describeError } from "../src/tutor.ts";
+import { Tutor, costOf, describeError } from "../src/tutor.ts";
 import { DEFAULT_SETTINGS, type AskRequest, type ContextCell } from "../src/types.ts";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -64,6 +64,27 @@ test("keep-warm sends the same prefix with max_tokens 0", async () => {
   assert.equal(warm.max_tokens, 0);
   assert.deepEqual(warm.messages[0].content, asked.messages[0].content.slice(0, -1));
   assert.deepEqual(warm.system, asked.system);
+});
+
+test("with caching off, no breakpoints are sent and keep-warm refuses", async () => {
+  const tutor = new Tutor({ apiKey: () => "k", summaryCacheFile: path.join(TMP, "s.json") });
+  const r = await tutor.ask(req({ cacheTtl: "off" }), { onText: () => {} });
+  assert.equal(r.cache, null);
+  const body = requests().at(-1).body;
+  assert.ok([...body.system, ...body.messages[0].content].every((b: { cache_control?: unknown }) => !b.cache_control));
+  const before = requests().length;
+  await assert.rejects(tutor.keepWarm(req({ cacheTtl: "off" })), /caching is off/);
+  assert.equal(requests().length, before, "no request sent");
+});
+
+test("cache writes cost 1.25× input for 5 minutes and 2× for 1 hour", () => {
+  const u = { input_tokens: 0, output_tokens: 0, cache_read_input_tokens: 0, cache_creation_input_tokens: 1_000_000 } as const;
+  const m = "claude-sonnet-5-5"; // $2 / MTok input
+  assert.equal(costOf(m, u as never, "5m").costUsd, 2.5);
+  assert.equal(costOf(m, u as never, "1h").costUsd, 4);
+  // The response's own split wins over the requested lifetime.
+  const split = { ...u, cache_creation: { ephemeral_5m_input_tokens: 400_000, ephemeral_1h_input_tokens: 600_000 } };
+  assert.equal(costOf(m, split as never, "1h").costUsd, 0.4 * 2.5 + 0.6 * 4);
 });
 
 test("summaries are written once by the summary model and cached on disk", async () => {

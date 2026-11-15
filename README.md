@@ -60,7 +60,7 @@ are saved in `~/notebooks` (override with `NOTEBOOK_DIR` in `.env`).
 - 🙈 hides a cell from the tutor; 📌 sends it untruncated. 🤔 **Ask about this error** inserts a prompt cell below a failed cell.
 - Status bar: kernel states, the **context ring** (how full the tutor's context is, as % of your token budget), and a quiet prompt-cache countdown with ↻ keep warm.
 - **Cell colours**: each cell has a stripe in its language's colour (Python, TypeScript, SQL, Markdown, ✨ Prompt) and prompt cells have a tinted background. Change the colours, or turn them off, in ⚙ Settings → Cell colours. (In VS Code, prompt cells are tinted; see the extension's README.)
-- ⚙ Settings: learner profile, model, reasoning, cache lifetime, and how much context the tutor gets, and cell colours.
+- ⚙ Settings: learner profile, model, reasoning, cache lifetime (1 hour, 5 minutes or off), and how much context the tutor gets, and cell colours.
 
 ### One-time setup (web app and development)
 

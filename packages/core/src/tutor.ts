@@ -14,7 +14,7 @@ import path from "node:path";
 import { blockText, budgetSteps, layoutBlocks, type Part } from "./plan.ts";
 import { SUMMARY_PROMPT, TUTOR_PROMPT, profileText } from "./prompts.ts";
 import { renderQuestion } from "./render.ts";
-import { modelInfo, ttlMs, type AskRequest, type CacheHit, type PromptUsage } from "./types.ts";
+import { modelInfo, ttlMs, type AskRequest, type CacheHit, type CacheTtl, type PromptUsage } from "./types.ts";
 
 export interface TutorOptions {
   /** Returns the API key; undefined lets the SDK read ANTHROPIC_API_KEY. */
@@ -45,11 +45,19 @@ interface Built {
   summarizedBlocks: number;
 }
 
-export function costOf(model: string, u: Anthropic.Messages.Usage | Anthropic.Beta.BetaUsage): PromptUsage {
+/** Cache writes cost 1.25× input for the 5-minute lifetime and 2× for 1 hour. */
+const WRITE_MULTIPLIER = { "5m": 1.25, "1h": 2 } as const;
+
+/** `ttl` prices cache writes when the response doesn't say which lifetime they used. */
+export function costOf(model: string, u: Anthropic.Messages.Usage | Anthropic.Beta.BetaUsage, ttl: CacheTtl = "1h"): PromptUsage {
   const m = modelInfo(model);
   const read = u.cache_read_input_tokens ?? 0;
   const write = u.cache_creation_input_tokens ?? 0;
-  const cost = (u.input_tokens * m.inputPerMTok + write * m.inputPerMTok * 2 + read * m.cacheReadPerMTok + u.output_tokens * m.outputPerMTok) / 1e6;
+  const split = u.cache_creation;
+  const write5m = split ? split.ephemeral_5m_input_tokens : ttl === "5m" ? write : 0;
+  const write1h = split ? split.ephemeral_1h_input_tokens : write - write5m;
+  const writeCost = (write5m * WRITE_MULTIPLIER["5m"] + write1h * WRITE_MULTIPLIER["1h"]) * m.inputPerMTok;
+  const cost = (u.input_tokens * m.inputPerMTok + writeCost + read * m.cacheReadPerMTok + u.output_tokens * m.outputPerMTok) / 1e6;
   return { model, inputTokens: u.input_tokens, outputTokens: u.output_tokens, cacheReadTokens: read, cacheWriteTokens: write, costUsd: cost };
 }
 
@@ -132,10 +140,11 @@ export class Tutor {
   }
 
   private async build(req: AskRequest, withQuestion: boolean): Promise<Built> {
-    const cache = { type: "ephemeral" as const, ttl: req.cacheTtl };
+    // Caching off: no breakpoints, so every token is billed as plain input.
+    const cache = req.cacheTtl === "off" ? undefined : { type: "ephemeral" as const, ttl: req.cacheTtl };
     const system: Anthropic.TextBlockParam[] = [{ type: "text", text: TUTOR_PROMPT }];
     if (req.learnerProfile.trim()) system.push({ type: "text", text: profileText(req.learnerProfile) });
-    system[system.length - 1].cache_control = cache;
+    if (cache) system[system.length - 1].cache_control = cache;
 
     const blocks = layoutBlocks(req.cells, req.context);
     let summaryCostUsd = 0;
@@ -149,8 +158,9 @@ export class Tutor {
     const toBlock = (p: Part): Block =>
       p.type === "text" ? { type: "text", text: p.text } : { type: "image", source: { type: "base64", media_type: "image/png", data: p.data } };
     const content: Block[] = blocks.flatMap((b) => b.parts.map(toBlock));
-    if (content.length) content[content.length - 1].cache_control = cache;
-    else content.push({ type: "text", text: "(The notebook has no cells above this question.)" });
+    if (content.length) {
+      if (cache) content[content.length - 1].cache_control = cache;
+    } else content.push({ type: "text", text: "(The notebook has no cells above this question.)" });
     if (withQuestion) content.push({ type: "text", text: renderQuestion(req.mode, req.question) });
     return { system, messages: [{ role: "user", content }], summaryCostUsd, summarizedBlocks: blocks.filter((b) => b.tier === "summary").length };
   }
@@ -170,7 +180,7 @@ export class Tutor {
   }
 
   private static cacheHit(req: AskRequest, startedAt: number, usage: PromptUsage): CacheHit | null {
-    if (usage.cacheReadTokens + usage.cacheWriteTokens === 0) return null; // prefix too small to cache
+    if (req.cacheTtl === "off" || usage.cacheReadTokens + usage.cacheWriteTokens === 0) return null; // off, or prefix too small to cache
     return { model: req.model, ttlMs: ttlMs(req.cacheTtl), startedAt, readTokens: usage.cacheReadTokens, writeTokens: usage.cacheWriteTokens };
   }
 
@@ -195,17 +205,18 @@ export class Tutor {
     }
     const final = await stream.finalMessage();
     if (final.stop_reason === "refusal") h.onText("\n\n_(The model declined to answer this one.)_");
-    const usage = costOf(req.model, final.usage);
+    const usage = costOf(req.model, final.usage, req.cacheTtl);
     return { usage: Tutor.withSummaries(usage, built), cache: Tutor.cacheHit(req, startedAt, usage), stopReason: final.stop_reason };
   }
 
   /** Re-send the cached prefix with max_tokens 0: a cache read that resets the timer. */
   async keepWarm(req: AskRequest): Promise<{ usage: PromptUsage; cache: CacheHit | null }> {
+    if (req.cacheTtl === "off") throw new Error("Prompt caching is off, so there is no cache to keep warm.");
     const built = await this.build(req, false);
     const startedAt = Date.now();
     // Same params as ask() (minus streaming) so the prefix and cache key match.
     const res = await (await this.sdk()).beta.messages.create({ ...Tutor.params(req), max_tokens: 0, system: built.system, messages: built.messages });
-    const usage = costOf(req.model, res.usage);
+    const usage = costOf(req.model, res.usage, req.cacheTtl);
     return { usage, cache: Tutor.cacheHit(req, startedAt, usage) };
   }
 }

@@ -68,11 +68,12 @@ function SettingsModal({ settings, onSave, onClose }: { settings: Settings; onSa
           <label className="check" title="Show a collapsible summary of the model's reasoning above each answer">
             <input type="checkbox" checked={draft.showThinking} onChange={(e) => set({ showThinking: e.target.checked })} /> Show reasoning
           </label>
-          <label title="Prompt cache lifetime. 1 hour costs 2× input to write; 5 minutes costs 1.25× but expires quickly.">
+          <label title="Prompt cache lifetime. 1 hour costs 2× input to write; 5 minutes costs 1.25× but expires quickly; off pays 1× input every question.">
             Cache lifetime
             <select value={draft.cacheTtl} onChange={(e) => set({ cacheTtl: e.target.value as Settings["cacheTtl"] })}>
               <option value="1h">1 hour</option>
               <option value="5m">5 minutes</option>
+              <option value="off">Off</option>
             </select>
           </label>
         </div>
